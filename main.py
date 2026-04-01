@@ -137,7 +137,9 @@ def compute_front_back_metrics(landmarks):
     }
 
 def compute_side_view_metrics(landmarks):
-    ear      = landmarks[7]
+    ear_l = landmarks[7]
+    ear_r = landmarks[8]
+    ear   = ear_l if ear_l.visibility >= ear_r.visibility else ear_r
     shoulder = landmarks[11]
     hip      = landmarks[23]
 
@@ -412,7 +414,7 @@ def analyze_posture_endpoint(payload: AnalyzeRequest):
         score, category, metrics, summary, overlay_result = analyze_posture(image, view=payload.view)
     except Exception as e:
         print(f"[ERROR] analyze: {e}", flush=True)
-        raise HTTPException(status_code=500, detail="Gagal memproses gambar.")
+        raise HTTPException(status_code=500, detail="Gagal memproses gambcompute_side_view_metricsar.")
 
     return {
         "score":             score,

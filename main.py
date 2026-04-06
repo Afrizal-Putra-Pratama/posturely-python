@@ -147,7 +147,7 @@ def compute_side_view_metrics(landmarks):
         dx, dy = p2.x - p1.x, p2.y - p1.y
         if dy == 0:
             return 90.0
-        return float(np.degrees(np.arctan(abs(dx / dy))))
+        return float(np.degrees(np.arctan2(abs(dx), abs(dy))))
 
     return {
         "neck_inclination_deg":  angle_with_vertical(shoulder, ear),
@@ -172,9 +172,9 @@ def rule_based_scoring_front(m):
         elif val >= mild:
             findings.append(_finding(label, "Ringan", f"Kemiringan {label.lower()} {val:.1f}{unit}. Sedikit berbeda.", val))
 
-    if hd >= 0.35:
+    if hd >= 0.25:
         findings.append(_finding("Kepala", "Sedang", f"Kepala maju index {hd:.2f}. Indikasi text neck.", hd))
-    elif hd >= 0.2:
+    elif hd >= 0.15:
         findings.append(_finding("Kepala", "Ringan", f"Kepala sedikit maju index {hd:.2f}.", hd))
 
     sh_mod = sh >= 5.0; hi_mod = hi >= 5.0; hd_mod = hd >= 0.35
@@ -198,20 +198,20 @@ def rule_based_scoring_front(m):
 def rule_based_scoring_back(m):
     sh, hi = m["shoulder_tilt_index"], m["hip_tilt_index"]
     findings = []
-    score    = 100.0 - sh * 8.0 - hi * 6.0
+    score    = 100.0 - sh * 12.0 - hi * 10.0
     score    = max(0.0, min(100.0, score))
 
-    for val, mild, mod, label in [(sh, 2.0, 5.0, "Bahu"), (hi, 2.0, 5.0, "Panggul")]:
+    for val, mild, mod, label in [(sh, 1.5, 3.5, "Bahu"), (hi, 1.5, 3.5, "Panggul")]:
         if val >= mod:
             findings.append(_finding(label, "Sedang", f"Kemiringan {label.lower()} {val:.1f}% dari belakang.", val))
         elif val >= mild:
             findings.append(_finding(label, "Ringan", f"Sedikit asimetri {label.lower()} {val:.1f}%.", val))
 
-    if score >= 90:
+    if score >= 80:
         cat, summary = "GOOD", f"Skor {score:.0f}/100 — BAIK dari belakang."
         if not findings:
             findings.append(_finding("Postur Keseluruhan", "Baik", "Simetris dari belakang.", 0))
-    elif score >= 78:
+    elif score >= 73:
         cat, summary = "FAIR", f"Skor {score:.0f}/100 — CUKUP BAIK. {len(findings)} area dipantau."
     else:
         cat, summary = "ATTENTION", f"Skor {score:.0f}/100 — PERLU PERHATIAN."
@@ -223,17 +223,17 @@ def rule_based_scoring_side(m):
     findings = []
     score    = 100.0
 
-    if neck >= 25:
+    if neck >= 20:
         findings.append(_finding("Leher", "Sedang", f"Leher menunduk {neck:.1f}°.", neck))
-        score -= (neck - 20) * 1.5
-    elif neck >= 15:
+        score -= (neck - 20) * 2.0
+    elif neck >= 10:
         findings.append(_finding("Leher", "Ringan", f"Leher sedikit menunduk {neck:.1f}°.", neck))
         score -= (neck - 10) * 1.0
 
-    if torso >= 35:
+    if torso >= 20:
         findings.append(_finding("Batang Tubuh", "Sedang", f"Punggung bungkuk {torso:.1f}°.", torso))
-        score -= (torso - 20) * 1.5
-    elif torso >= 20:
+        score -= (torso - 15) * 2.0
+    elif torso >= 10:
         findings.append(_finding("Batang Tubuh", "Ringan", f"Punggung sedikit bungkuk {torso:.1f}°.", torso))
         score -= (torso - 10) * 1.0
 

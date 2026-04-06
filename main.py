@@ -207,11 +207,11 @@ def rule_based_scoring_back(m):
         elif val >= mild:
             findings.append(_finding(label, "Ringan", f"Sedikit asimetri {label.lower()} {val:.1f}%.", val))
 
-    if score >= 95:
+    if score >= 90:
         cat, summary = "GOOD", f"Skor {score:.0f}/100 — BAIK dari belakang."
         if not findings:
             findings.append(_finding("Postur Keseluruhan", "Baik", "Simetris dari belakang.", 0))
-    elif score >= 80:
+    elif score >= 78:
         cat, summary = "FAIR", f"Skor {score:.0f}/100 — CUKUP BAIK. {len(findings)} area dipantau."
     else:
         cat, summary = "ATTENTION", f"Skor {score:.0f}/100 — PERLU PERHATIAN."
@@ -230,10 +230,10 @@ def rule_based_scoring_side(m):
         findings.append(_finding("Leher", "Ringan", f"Leher sedikit menunduk {neck:.1f}°.", neck))
         score -= (neck - 10) * 1.0
 
-    if torso >= 25:
+    if torso >= 35:
         findings.append(_finding("Batang Tubuh", "Sedang", f"Punggung bungkuk {torso:.1f}°.", torso))
         score -= (torso - 20) * 1.5
-    elif torso >= 15:
+    elif torso >= 20:
         findings.append(_finding("Batang Tubuh", "Ringan", f"Punggung sedikit bungkuk {torso:.1f}°.", torso))
         score -= (torso - 10) * 1.0
 
